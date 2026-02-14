@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { MainLayout } from "@/components/navigation";
 import { getDictionary } from '@/lib/i18n';
-import { defaultLocale, type Locale } from '@/lib/i18n.config';
+import { defaultLocale, locales, type Locale } from '@/lib/i18n.config';
 import type { ReactNode } from "react";
 import { getLocaleUrl } from '@/lib/utils';
 import siteConfig from '@site-config';
+
+export function generateStaticParams(): { lang: Locale }[] {
+    return locales.map((lang) => ({ lang }));
+}
 
 export async function generateMetadata(
     { params }: { params: { lang: Locale } }

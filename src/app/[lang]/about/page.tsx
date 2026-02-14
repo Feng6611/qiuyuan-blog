@@ -2,6 +2,7 @@ import AboutContent from './components/AboutContent';
 import { getDictionary } from "@/lib/i18n";
 import { type Locale } from "@/lib/i18n.config";
 
+export const runtime = 'edge';
 export const revalidate = 300;
 
 export default async function AboutPage({ params }: { params: { lang: Locale } }) { // Renamed to AboutPage

@@ -31,6 +31,28 @@ npm run lint
 npm run build
 ```
 
+## Cloudflare Pages (Wrangler + next-on-pages)
+
+Build Cloudflare Pages output locally:
+
+```bash
+npm run build:pages
+```
+
+Create a Pages project from CLI (no dashboard clicks):
+
+```bash
+npx wrangler login
+npx wrangler pages project create qiuyuan-blog --production-branch main
+```
+
+Deploy via direct upload:
+
+```bash
+export CF_PAGES_PROJECT=qiuyuan-blog
+npm run deploy:cf
+```
+
 ## Template sync workflow (git subtree)
 
 1. Add template remote once:

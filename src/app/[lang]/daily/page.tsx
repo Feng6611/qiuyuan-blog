@@ -4,6 +4,7 @@ import { getDictionary } from "@/lib/i18n";
 import { defaultLocale } from "@/lib/i18n.config";
 import { getLocalePath } from '@/lib/utils';
 
+export const runtime = 'edge';
 export const revalidate = 300;
 
 export default async function DailyPage() {

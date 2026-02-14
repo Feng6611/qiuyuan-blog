@@ -6,7 +6,10 @@
     "dev": "next dev",
     "postids:check": "npx ts-node .scripts/generate-postids.ts --check",
     "postids:fix": "npx ts-node .scripts/generate-postids.ts --fix",
-    "build": "npm run postids:check && npx ts-node .scripts/generate-content-index.ts && next build",
+    "content:bundle": "npx ts-node .scripts/generate-content-bundle.ts",
+    "build": "npm run postids:check && npm run content:bundle && next build",
+    "build:pages": "npm run postids:check && npm run content:bundle && CI=1 VERCEL_TELEMETRY_DISABLED=1 npx @cloudflare/next-on-pages",
+    "deploy:cf": "npm run build:pages && npx wrangler pages deploy .vercel/output/static --project-name \"$CF_PAGES_PROJECT\"",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"

@@ -1,6 +1,5 @@
 import React from 'react';
 import { PostData } from '@/lib/posts';
-import path from 'path';
 import MDXContent from '@/components/ui/MDXContent';
 import Link from 'next/link';
 import { Locale, Dictionary } from '@/lib/i18n.config';
@@ -23,7 +22,7 @@ export default async function PostDetail({ post, lang, dictionary }: PostDetailP
             <article>
                 <header className="mb-8">
                     <h1 className="text-3xl font-bold mb-2 text-gray-900">
-                        {post.title || path.basename(post.fileName, '.md')}
+                        {post.title || post.fileName.replace(/\.md$/i, '')}
                     </h1>
                     <div className="text-sm text-gray-600">
                         {formatDateByLocale(post.date, lang)}

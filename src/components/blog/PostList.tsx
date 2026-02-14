@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from "next/link"
-import path from 'path';
 import { formatDateByLocale } from '@/lib/utils';
 import type { Locale } from '@/lib/i18n.config';
 import type { PostSummary } from '@/lib/posts';
@@ -56,7 +55,7 @@ export default function PostList({ posts, baseUrl, header, lang = 'zh' }: PostLi
                                         className="block sm:flex sm:justify-between sm:items-baseline py-1.5 sm:py-1 rounded-md transition-colors group-hover/item:text-primary"
                                     >
                                         <h3 className="text-base font-medium text-gray-600 transition-colors mb-1 sm:mb-0">
-                                            {path.basename(post.fileName, '.md')}
+                                            {post.title || post.fileName.replace(/\.md$/i, '')}
                                         </h3>
                                         <time className="text-sm text-muted-foreground sm:whitespace-nowrap sm:pl-4 sm:flex-shrink-0 sm:w-[8rem] sm:text-right font-mono">
                                             {post.date ? formatDateByLocale(post.date, lang) : '未知日期'}
