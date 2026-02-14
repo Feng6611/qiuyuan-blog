@@ -1,0 +1,16 @@
+{
+  "greeting": "你好！",
+  "navbar.home": "首页",
+  "navbar.crafts": "作品",
+  "navbar.memos": "瞬间",
+  "navbar.openMenu": "打开主菜单",
+  "navbar.closeMenu": "关闭主菜单",
+  "metadata.title": "秋园",
+  "metadata.description": "QiuYuan 的文章、随记与日常写作。",
+  "home.title": "秋园",
+  "home.description": "QiuYuan 的文章、随记与日常写作。",
+  "language.en": "EN",
+  "language.zh": "中文",
+  "language.switchTo.en": "切换到英文",
+  "language.switchTo.zh": "切换到中文"
+} 
