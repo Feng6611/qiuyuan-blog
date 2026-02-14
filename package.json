@@ -10,6 +10,8 @@
     "build": "npm run postids:check && npm run content:bundle && next build",
     "build:pages": "npm run postids:check && npm run content:bundle && CI=1 VERCEL_TELEMETRY_DISABLED=1 npx @cloudflare/next-on-pages",
     "deploy:cf": "npm run build:pages && npx wrangler pages deploy .vercel/output/static --project-name qiuyuan-blog",
+    "deploy:cf:preview": "npm run build:pages && npx wrangler pages deploy .vercel/output/static --project-name qiuyuan-blog --branch preview",
+    "deploy:cf:prod": "npm run build:pages && npx wrangler pages deploy .vercel/output/static --project-name qiuyuan-blog --branch main",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
