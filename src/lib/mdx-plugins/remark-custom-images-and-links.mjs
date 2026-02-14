@@ -45,20 +45,9 @@ export default function remarkCustomImagesAndLinks(options = defaultOptions) {
       const alt = node.alt || '';
       const caption = node.title || alt || '';
 
-      const newNode = {
-        type: 'mdxJsxFlowElement',
-        name: 'CenteredImage',
-        attributes: [
-          { type: 'mdxJsxAttribute', name: 'src', value: src },
-          { type: 'mdxJsxAttribute', name: 'alt', value: alt },
-          { type: 'mdxJsxAttribute', name: 'caption', value: caption },
-        ],
-        children: [],
-        data: { _mdxExplicitJsx: true },
-      };
-      // Replace the image node with the component node at the parent level
-      parent.children.splice(index, 1, newNode);
-      return [visit.SKIP, index]; // Skip further processing for this node
+      // Keep it as a standard mdast image node so it can be rendered by `react-markdown`
+      // (Workers/Edge-safe; avoids MDX runtime).
+      node.title = caption;
     });
 
     // Phase 2: Handle Wiki Images - Elevate to sibling
@@ -108,17 +97,19 @@ export default function remarkCustomImagesAndLinks(options = defaultOptions) {
             const alt = fileName;
             const caption = fileName;
             const src = `/image/${fileName.includes('.') ? fileName : fileName + '.png'}`;
+            /** @type {import('mdast').Image} */
             const imageNode = {
-              type: 'mdxJsxFlowElement',
-              name: 'CenteredImage',
-              attributes: [
-                { type: 'mdxJsxAttribute', name: 'src', value: src },
-                { type: 'mdxJsxAttribute', name: 'alt', value: alt },
-                { type: 'mdxJsxAttribute', name: 'caption', value: caption },
-                ...(width ? [{ type: 'mdxJsxAttribute', name: 'width', value: width }] : []),
-              ],
-              children: [],
-              data: { _mdxExplicitJsx: true },
+              type: 'image',
+              url: src,
+              alt,
+              title: caption,
+              data: width
+                ? {
+                    hProperties: {
+                      width,
+                    },
+                  }
+                : undefined,
             };
             nodesToInsert.push(imageNode);
   
@@ -164,8 +155,8 @@ export default function remarkCustomImagesAndLinks(options = defaultOptions) {
         while (i < paragraphNode.children.length) {
             const node = paragraphNode.children[i];
 
-            // Skip nodes that are already links or image components
-            if (node.type === 'link' || node.type === 'mdxJsxFlowElement') {
+            // Skip nodes that are already links or images
+            if (node.type === 'link' || node.type === 'image') {
                  i++; // Move to next node
                  continue;
             }
