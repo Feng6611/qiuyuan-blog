@@ -46,11 +46,26 @@ npx wrangler login
 npx wrangler pages project create qiuyuan-blog --production-branch main
 ```
 
-Deploy via direct upload:
+This repo includes `wrangler.toml` with:
+
+- `name = "qiuyuan-blog"`
+- `pages_build_output_dir = ".vercel/output/static"`
+- `compatibility_flags = ["nodejs_compat"]` (set for top-level + `production` + `preview`)
+
+Deploy via direct upload (no env var required):
 
 ```bash
-export CF_PAGES_PROJECT=qiuyuan-blog
 npm run deploy:cf
+```
+
+Deploy explicitly as preview or production:
+
+```bash
+# Preview deployment
+npx wrangler pages deploy .vercel/output/static --project-name qiuyuan-blog --branch preview
+
+# Production deployment
+npx wrangler pages deploy .vercel/output/static --project-name qiuyuan-blog --branch main
 ```
 
 ## Template sync workflow (git subtree)
