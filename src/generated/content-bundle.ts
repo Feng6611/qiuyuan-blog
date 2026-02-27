@@ -27,7 +27,7 @@ export interface ContentBundle {
 }
 
 export const contentBundle: ContentBundle = {
-  "generatedAt": "2026-02-27T09:29:39.776Z",
+  "generatedAt": "2026-02-27T10:06:35.389Z",
   "posts": [
     {
       "slug": "birth-to-day-6",
