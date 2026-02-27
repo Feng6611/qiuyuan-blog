@@ -1,4 +1,15 @@
-# OpenClaw 极简部署指南（国内版）
+---
+slug: openclaw-deploy-guide-cn
+date: '2026-02-26'
+title: 'OpenClaw 极简部署指南（国内版）'
+description: '让新手在 30 分钟内拥有自己的 AI Agent 服务。'
+keywords:
+  - openclaw
+  - deploy
+  - vps
+  - minimax
+  - feishu
+---
 
 **目标**: 让新手在 30 分钟内拥有自己的 AI Agent 服务
 

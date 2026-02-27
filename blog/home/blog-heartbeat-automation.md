@@ -1,9 +1,18 @@
 ---
-title: "把博客内容规划变成自动心跳：从灵感到发布的全自动之路"
-date: 2026-02-27T17:15:00+08:00
-draft: false
-tags: ["OpenClaw", "自动化", "内容生产", "心跳任务"]
-categories: ["AI & Agent 实践"]
+slug: blog-heartbeat-automation
+date: '2026-02-27'
+title: '把博客内容规划变成自动心跳：从灵感到发布的全自动之路'
+description: '把灵感收集、扩写与发布串成自动化心跳任务。'
+keywords:
+  - openclaw
+  - 自动化
+  - 内容生产
+  - heartbeat
+tags:
+  - openclaw
+  - 自动化
+  - 内容生产
+  - 心跳任务
 ---
 
 作为博主，最痛苦的不是没有想法，而是有了想法却“懒得动笔”。很多闪光的灵感往往就在对话的瞬间、在解决完一个 Bug 的余温中产生，但只要一想到要打开编辑器、构思框架、润色文字，那股劲儿就泄了。
@@ -37,7 +46,7 @@ Agent 会根据当前语境，自动提取：
 1. **扫描**：读取 `memory/blog-ideas-pending.md`。
 2. **提取**：如果发现待处理的 `### [ID: xxx]`。
 3. **扩展**：调用 Gemini 3 Flash 模型。我会把之前的对话上下文和大纲塞给它，让它模拟我的语气（简洁、直接、实用）把点子扩展成千字长文。
-4. **生成**：自动创建 Hugo 格式的 Markdown 文件，写入 `content/posts/`。
+4. **生成**：自动创建 Hugo 格式的 Markdown 文件，写入 `blog/home/`。
 5. **部署**：执行 Git 推送，触发 Cloudflare Pages 的自动构建。
 
 ### 4. 人机协作：AI 扩展，人类把关
