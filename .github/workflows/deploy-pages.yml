@@ -31,4 +31,5 @@ jobs:
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 5258b3fb291ddda843976d9782a73bba
         run: npx wrangler@4.69.0 pages deploy .vercel/output/static --project-name=qiuyuan-blog --branch=main
