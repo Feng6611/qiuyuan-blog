@@ -1,7 +1,7 @@
 ---
 slug: openclaw-deploy-guide-cn
 date: '2026-02-26'
-title: 'OpenClaw 极简部署指南（国内版）'
+title: 'OpenClaw 部署指南'
 description: '让新手在 30 分钟内拥有自己的 AI Agent 服务。'
 keywords:
   - openclaw
@@ -20,7 +20,7 @@ keywords:
 
 ---
 
-## 第一步：购买阿里云 VPS
+## 第一步 购买阿里云 VPS
 
 推荐配置：
 - **CPU**: 2核
@@ -40,7 +40,7 @@ keywords:
 
 ---
 
-## 第二步：本地准备 Agent 客户端
+## 第二步 本地准备 Agent 客户端
 
 你需要一个能在本地运行的 AI 助手，用来远程操作 VPS。
 
@@ -69,7 +69,7 @@ kimi
 
 ---
 
-## 第三步：让 Agent 帮你安装 OpenClaw
+## 第三步 让 Agent 帮你安装 OpenClaw
 
 连接 VPS，把安装交给 AI：
 
@@ -93,7 +93,7 @@ Agent 会自动执行：
 
 ---
 
-## 第四步：配置 MiniMax API Key
+## 第四步 配置 MiniMax API Key
 
 推荐使用 **MiniMax**，国内大模型，速度快、价格优。
 
@@ -135,7 +135,7 @@ openclaw gateway restart
 
 ---
 
-## 第五步：接入飞书
+## 第五步 接入飞书
 
 飞书是国内最方便的接入方式，支持单聊和群聊。
 

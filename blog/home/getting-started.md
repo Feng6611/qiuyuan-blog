@@ -1,7 +1,8 @@
 ---
 slug: getting-started
 date: '2026-02-14'
-description: First post for qiuyuan-blog.
+title: '欢迎来到 QiuYuan Blog'
+description: 'First post for qiuyuan-blog.'
 keywords:
   - qiuyuan
   - intro
