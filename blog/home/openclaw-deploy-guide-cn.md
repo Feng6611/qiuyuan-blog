@@ -181,6 +181,22 @@ openclaw gateway restart
 
 飞书是最方便的对话接口，支持单聊、群聊、文件传输。
 
+**推荐使用 GitHub 社区版本**（而非官方版本），功能更完善，维护更活跃。
+
+### 安装飞书扩展
+
+```bash
+# 进入 OpenClaw 扩展目录
+cd ~/.openclaw/extensions
+
+# 克隆社区版飞书扩展
+git clone https://github.com/openclaw/extension-feishu.git feishu
+
+# 安装依赖
+cd feishu
+npm install
+```
+
 ### 飞书应用配置
 
 #### 1. 创建飞书应用
@@ -192,7 +208,7 @@ openclaw gateway restart
 #### 2. 获取凭证
 
 进入"凭证与基础信息"，复制：
-- **App ID**（如 \`cli_xxxxxxxxxxxx\`）
+- **App ID**（如 `cli_xxxxxxxxxxxx`）
 - **App Secret**
 
 #### 3. 配置权限
@@ -200,21 +216,21 @@ openclaw gateway restart
 进入"权限管理"，添加以下权限：
 
 **必需权限**：
-- \`im:message\` - 获取与发送单聊、群组消息
-- \`im:message.group_msg\` - 接收群聊消息
-- \`im:message.p2p_msg\` - 接收单聊消息
-- \`im:chat\` - 获取群组信息
+- `im:message` - 获取与发送单聊、群组消息
+- `im:message.group_msg` - 接收群聊消息
+- `im:message.p2p_msg` - 接收单聊消息
+- `im:chat` - 获取群组信息
 
 **可选权限**（如需文件/图片）：
-- \`im:resource\` - 获取与上传图片、文件资源
-- \`drive:drive\` - 访问云文档
+- `im:resource` - 获取与上传图片、文件资源
+- `drive:drive` - 访问云文档
 
 #### 4. 配置事件订阅
 
 进入"事件订阅"，配置：
-- **请求地址**：\`http://你的VPS_IP:8787/feishu/webhook\`
+- **请求地址**：`http://你的VPS_IP:8787/feishu/webhook`
 - **订阅事件**：
-  - \`im.message.receive_v1\`（接收消息）
+  - `im.message.receive_v1`（接收消息）
 
 **注意**：如果 VPS 没有公网 IP，可以用内网穿透（如 frp、ngrok）。
 
@@ -231,13 +247,13 @@ openclaw gateway restart
 
 ### 配置到 OpenClaw
 
-\`\`\`bash
+```bash
 nano ~/.openclaw/openclaw.json
-\`\`\`
+```
 
 **一键复制配置**（替换你的凭证）：
 
-\`\`\`json
+```json
 {
   "channels": [
     {
@@ -250,16 +266,29 @@ nano ~/.openclaw/openclaw.json
     }
   ]
 }
-\`\`\`
+```
 
 **配置说明**:
-- \`verificationToken\` 和 \`encryptKey\` 在飞书"事件订阅"页面获取
-- 如果不需要加密，\`encryptKey\` 可以留空
+- `verificationToken` 和 `encryptKey` 在飞书"事件订阅"页面获取
+- 如果不需要加密，`encryptKey` 可以留空
+
+### 为什么用社区版？
+
+**社区版优势**：
+- 功能更完善（支持更多消息类型）
+- 更新更及时（社区活跃维护）
+- 问题修复快（GitHub Issues 响应快）
+- 可以自己定制（开源代码）
+
+**官方版问题**：
+- 功能较基础
+- 更新较慢
+- 部分边缘场景支持不好
 
 重启并测试：
-\`\`\`bash
+```bash
 openclaw gateway restart
-\`\`\`
+```
 
 在飞书里 @你的机器人，发送"你好"，看看能否回复！
 
