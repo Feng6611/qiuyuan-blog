@@ -74,7 +74,7 @@ curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 apt install -y nodejs
 
 # 安装 Kimi CLI
-npm install -g @kimi-ai/cli
+npm install -g @jacksontian/kimi-cli
 
 # 运行（后面第三步要用）
 kimi
@@ -105,7 +105,7 @@ nvm use 22
 然后安装并运行 Kimi CLI：
 
 ```bash
-npm install -g @kimi-ai/cli
+npm install -g @jacksontian/kimi-cli
 kimi
 ```
 
