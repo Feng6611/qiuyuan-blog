@@ -46,19 +46,71 @@ keywords:
 
 ---
 
-## 第二步：安装 Kimi CLI
+## 第二步：准备并安装 Kimi CLI
 
 Kimi CLI 是月之暗面推出的 AI 编程助手，国内访问快，支持代码生成和系统操作。
 
-### 本地安装 Kimi CLI
+> 重要：Kimi CLI 是通过 **npm** 安装的，所以你需要先有 **Node.js + npm**。
+>
+> 你可以把 Kimi CLI 装在：
+> - **方案 A（推荐）**：VPS 上（不要求你本地电脑装 Node.js，最省事）
+> - **方案 B**：本地电脑上（适合你本地已经有 Node.js 的情况）
+
+### 方案 A（推荐）：在 VPS 上安装并运行 Kimi CLI
+
+先 SSH 进你的 VPS：
 
 ```bash
+ssh root@YOUR_VPS_IP
+```
+
+然后在 VPS 上安装 Node.js 22+（Ubuntu 22.04）并安装 Kimi CLI：
+
+```bash
+# 安装 Node.js 22+（包含 npm）
+apt update
+apt install -y ca-certificates curl gnupg
+curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+apt install -y nodejs
+
 # 安装 Kimi CLI
 npm install -g @kimi-ai/cli
 
-# 运行
+# 运行（后面第三步要用）
 kimi
 ```
+
+### 方案 B：在本地电脑安装 Kimi CLI（需要先装 Node.js）
+
+先检查本机是否已经有 Node.js / npm：
+
+```bash
+node -v
+npm -v
+```
+
+如果提示“找不到命令”，说明你还没装 Node.js。下面给你三种最常见的安装方式（任选其一）：
+
+- **macOS（Homebrew）**：`brew install node`
+- **Windows（winget）**：`winget install OpenJS.NodeJS.LTS`
+- **通用方式（nvm，推荐）**：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+# 重新打开终端后
+nvm install 22
+nvm use 22
+```
+
+然后安装并运行 Kimi CLI：
+
+```bash
+npm install -g @kimi-ai/cli
+kimi
+```
+
+> 注意：如果你把 Kimi CLI 装在本地电脑上，它默认只能在你的本机执行命令。
+> 你仍然需要 **SSH 到 VPS** 执行安装命令（或者在 Kimi 中使用 SSH 工具连接到 VPS）。
 
 **为什么推荐 Kimi？**
 - 国内服务，速度快
@@ -70,21 +122,28 @@ kimi
 
 ## 第三步：一键安装 OpenClaw
 
-### 连接 VPS
+### 连接 VPS（如果你还没连上）
 
 ```bash
-# SSH 连接你的 VPS
 ssh root@YOUR_VPS_IP
 ```
 
-### 复制以下提示词给 Kimi CLI
+### 启动 Kimi CLI
+
+如果你按上面的「方案 A」把 Kimi CLI 装在 VPS 上，现在直接运行：
+
+```bash
+kimi
+```
+
+### 复制以下提示词到 Kimi CLI
 
 ```
 我需要在这台 Ubuntu 22.04 服务器上安装 OpenClaw。
 
 请按以下步骤操作：
 1. 更新系统包：apt update && apt upgrade -y
-2. 安装 Node.js 22+：
+2. （如果未安装）安装 Node.js 22+：
    - 添加 NodeSource 仓库
    - 安装 nodejs 和 npm
 3. 安装 OpenClaw：npm install -g openclaw
