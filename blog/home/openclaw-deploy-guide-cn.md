@@ -296,134 +296,249 @@ openclaw gateway restart
 
 ## 第六步：配置最佳实践
 
-OpenClaw 安装好后，还需要配置一些最佳实践，让它更好用。
+OpenClaw 安装好后，还需要配置核心文件和必要工具，让它真正好用。
 
-### 1. 创建工作目录
+### 1. 创建核心工作文件
 
-\`\`\`bash
-mkdir -p ~/.openclaw/workspace
+这些文件是 OpenClaw 的"记忆系统"，基于我们实际使用的最佳实践。
+
+```bash
+mkdir -p ~/.openclaw/workspace/memory
 cd ~/.openclaw/workspace
-\`\`\`
+```
 
-### 2. 初始化核心文件
+**核心文件说明**：
+
+**AGENTS.md** - 工作规范
+- 每次启动先读取 SOUL.md、USER.md、memory/YYYY-MM-DD.md
+- 在主会话中读取 MEMORY.md（长期记忆）
+- 记录重要事件到 memory/YYYY-MM-DD.md
+- 群聊中知道何时说话、何时沉默
+- 用 emoji 反应代替不必要的回复
+
+**SOUL.md** - 个性设定
+- 真诚帮助，不要表演式客套
+- 有观点，可以表达偏好
+- 先尝试自己解决，再寻求帮助
+- 通过能力赢得信任
+
+**USER.md** - 用户信息
+- 名字、时区、偏好
+- 项目列表
+- 联系方式
+
+**MEMORY.md** - 长期记忆（仅主会话加载）
+- 重要决策记录
+- 常用命令和配置
+- 踩过的坑和解决方案
+- 不在群聊中加载（安全考虑）
+
+**HEARTBEAT.md** - 心跳任务
+- 定期检查的任务列表
+- 检查频率和提醒规则
+
+**TOOLS.md** - 工具配置
+- SSH 主机、API Key 位置
+- 常用命令别名
+
+**IDENTITY.md** - 身份设定（可选）
+- Agent 的名字和形象
+- 喜好和工作方式
 
 **一键复制提示词给 Kimi**：
 
-\`\`\`
+```
 帮我在 ~/.openclaw/workspace 目录下创建以下文件：
 
-1. AGENTS.md - 工作规范
-内容：
-- 每次启动先读取 SOUL.md、USER.md、MEMORY.md
-- 记录重要事件到 memory/YYYY-MM-DD.md
-- 不要泄露私密信息
-- 外部操作（发邮件、发推）需要确认
-
-2. SOUL.md - 个性设定
-内容：
-- 我是一个 AI 助手，名字由用户决定
-- 风格：简洁、直接、有用
-- 不说废话，不过度客套
-- 有观点，可以表达偏好
-
-3. USER.md - 用户信息
-内容：
-- 名字：[用户填写]
-- 时区：Asia/Shanghai
-- 偏好：[用户填写]
-
-4. MEMORY.md - 长期记忆
-内容：
-- 重要决策记录
-- 常用命令和配置
-- 踩过的坑
-
-5. HEARTBEAT.md - 心跳任务
-内容：
-- 每小时检查一次
-- 检查项：邮件、日历、待办
-- 有重要事项时提醒
-
-6. TOOLS.md - 工具配置
-内容：
-- SSH 主机列表
-- API Key 位置（不要写明文）
-- 常用命令别名
+1. AGENTS.md - 参考 https://github.com/openclaw/openclaw/blob/main/examples/workspace/AGENTS.md
+2. SOUL.md - 参考 https://github.com/openclaw/openclaw/blob/main/examples/workspace/SOUL.md  
+3. USER.md - 包含：名字、时区、偏好、项目列表
+4. MEMORY.md - 空文件，后续手动填充
+5. HEARTBEAT.md - 包含：任务清单、检查规则
+6. TOOLS.md - 包含：SSH 主机、API Key 位置、命令别名
+7. IDENTITY.md - 包含：Agent 名字、形象、风格
 
 创建 memory 目录：
 mkdir -p memory
 
 所有文件用 UTF-8 编码，Markdown 格式。
-\`\`\`
+```
 
-### 3. 安装必要的 Skills
+### 2. 安装必要的 Skills
 
-Skills 是 OpenClaw 的扩展能力，类似插件。
+#### skill-library-manager（必装）
 
-**推荐 Skills**：
+Vercel 开发的技能管理工具，用于发现、安装、更新高质量 Skills。
 
-\`\`\`bash
-# 进入 skills 目录
+```bash
+cd ~/.openclaw/skills
+git clone https://github.com/vercel/skill-library-manager.git
+cd skill-library-manager
+npm install
+```
+
+**用法**：
+```bash
+# 搜索技能
+openclaw skill search github
+
+# 安装高分技能
+openclaw skill install --top-rated
+
+# 更新技能
+openclaw skill update
+```
+
+#### agent-reach（必装）
+
+集成多个搜索服务的全网搜索工具，支持：
+- Twitter/X、Reddit、YouTube
+- GitHub、Bilibili、小红书、抖音
+- LinkedIn、Boss直聘、RSS
+
+```bash
+cd ~/.openclaw/skills
+git clone https://github.com/openclaw/agent-reach.git
+cd agent-reach
+npm install
+```
+
+**配置各平台 API**：
+```bash
+nano ~/.openclaw/skills/agent-reach/config.json
+```
+
+**一键复制提示词给 Kimi**：
+```
+帮我安装 OpenClaw 的必要 Skills：
+
+1. skill-library-manager
+   - 克隆：git clone https://github.com/vercel/skill-library-manager.git
+   - 安装依赖：npm install
+
+2. agent-reach  
+   - 克隆：git clone https://github.com/openclaw/agent-reach.git
+   - 安装依赖：npm install
+   - 创建配置文件模板
+
+位置：~/.openclaw/skills/
+```
+
+#### 其他推荐 Skills（按需安装）
+
+```bash
 cd ~/.openclaw/skills
 
-# 克隆常用 skills（示例）
+# GitHub 操作
 git clone https://github.com/openclaw/skill-github.git
+
+# 天气查询
+git clone https://github.com/openclaw/skill-weather.git
+
+# 日历管理
 git clone https://github.com/openclaw/skill-calendar.git
-git clone https://github.com/openclaw/skill-email.git
-\`\`\`
+```
 
-**或者让 Kimi 帮你安装**：
-
-\`\`\`
-帮我在 ~/.openclaw/skills 目录下安装以下 skills：
-1. github - GitHub 操作（issues、PR、CI）
-2. calendar - 日历管理
-3. email - 邮件处理
-
-参考 OpenClaw 文档：https://docs.openclaw.ai/skills
-\`\`\`
-
-### 4. 配置心跳机制
+### 3. 配置心跳机制
 
 心跳机制让 OpenClaw 定期检查任务，主动提醒你。
 
-编辑 \`~/.openclaw/openclaw.json\`，添加：
+编辑 `~/.openclaw/openclaw.json`，添加：
 
-\`\`\`json
+```json
 {
   "heartbeat": {
     "enabled": true,
     "interval": 3600,
-    "prompt": "检查 HEARTBEAT.md 中的任务，有重要事项时提醒我。没有就回复 HEARTBEAT_OK。"
+    "prompt": "读取 HEARTBEAT.md 中的任务，有重要事项时提醒我。没有就回复 HEARTBEAT_OK。"
   }
 }
-\`\`\`
+```
 
-**配置说明**:
-- \`interval\`: 心跳间隔（秒），3600 = 1小时
-- \`prompt\`: 心跳提示词，告诉 OpenClaw 该做什么
+**HEARTBEAT.md 示例**：
 
-### 5. Memory 管理规范
+```markdown
+# HEARTBEAT.md - 心跳任务
 
-**日常记录**：写入 \`memory/YYYY-MM-DD.md\`
+## 任务清单
+
+- [ ] 邮件检查 - 有未读重要邮件吗？
+- [ ] 日历检查 - 未来 24 小时有活动吗？
+- [ ] GitHub 通知 - 有新的 Issues/PR 吗？
+
+## 检查规则
+
+1. 工作时间（9:00-22:00）每小时检查
+2. 深夜（22:00-9:00）仅紧急情况提醒
+3. 有重要事项时主动通知
+4. 没有事项时回复 HEARTBEAT_OK
+```
+
+### 4. Memory 管理规范
+
+基于我们实际使用的管理方式：
+
+**日常记录**：`memory/YYYY-MM-DD.md`
 - 今天做了什么
 - 遇到的问题和解决方案
-- 重要决策
+- 重要决策和想法
 
-**长期记忆**：更新 \`MEMORY.md\`
-- 定期（每周）整理日常记录
+**长期记忆**：`MEMORY.md`
+- 每周整理一次日常记录
 - 提取重要信息到 MEMORY.md
-- 删除过时内容
+- 保持精简（< 5000 字）
+
+**安全规则**：
+- MEMORY.md 只在主会话加载（不在群聊）
+- 敏感信息放在 `~/.openclaw/secrets/`
 
 **示例**：
 
-\`\`\`bash
+```bash
 # 今天的记录
-echo "## 2026-03-01\n- 部署了 OpenClaw\n- 配置了飞书对话\n- 遇到 API Key 格式问题，已解决" >> memory/2026-03-01.md
+cat >> memory/2026-03-01.md << 'EOF'
+## 2026-03-01
 
-# 长期记忆
-echo "## 踩坑记录\n- Kimi API Key 不要包含空格" >> MEMORY.md
-\`\`\`
+### 完成
+- 部署了 OpenClaw
+- 配置了飞书对话
+
+### 问题
+- Kimi API Key 格式错误 → 不要包含空格
+
+### 决策
+- 使用社区版飞书扩展
+EOF
+
+# 更新长期记忆
+cat >> MEMORY.md << 'EOF'
+## 踩坑记录
+- Kimi API Key 不要包含空格
+- 飞书权限要完整配置
+EOF
+```
+
+### 5. 群聊礼仪配置
+
+如果 OpenClaw 会加入群聊，在 `AGENTS.md` 中添加：
+
+**何时说话**：
+- 被 @ 或直接提问
+- 能提供真正有价值的信息
+- 纠正重要错误
+
+**何时沉默（HEARTBEAT_OK）**：
+- 人类之间的闲聊
+- 问题已被回答
+- 只想说"好的"、"赞"
+
+**使用 Emoji 反应**：
+- 认可：👍 ❤️ 🙌
+- 有趣：😂 💀
+- 思考：🤔 💡
+- 确认：✅ 👀
+
+**原则**：参与，不要主导。质量 > 数量。
 
 ---
 
