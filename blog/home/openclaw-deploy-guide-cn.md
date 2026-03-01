@@ -88,7 +88,7 @@ ssh root@YOUR_VPS_IP
    - 添加 NodeSource 仓库
    - 安装 nodejs 和 npm
 3. 安装 OpenClaw：npm install -g openclaw
-4. 初始化配置：openclaw init
+4. 初始化配置：openclaw setup
 5. 配置 systemd 服务，让 OpenClaw 开机自启
 6. 启动服务：openclaw gateway start
 7. 验证状态：openclaw status
@@ -181,19 +181,22 @@ openclaw gateway restart
 
 飞书是最方便的对话接口，支持单聊、群聊、文件传输。
 
-**推荐使用 GitHub 社区版本**（而非官方版本），功能更完善，维护更活跃。
+### 飞书扩展（OpenClaw 已内置，无需额外安装）
 
-### 安装飞书扩展
+OpenClaw 安装包已经自带飞书扩展，默认路径如下：
+
+- `/usr/lib/node_modules/openclaw/extensions/feishu`
+
+所以你**不需要**再 `git clone` 飞书扩展，也不需要手动 `npm install`。直接完成下面的「飞书应用配置」和「配置到 OpenClaw」即可。
+
+> 可选：如果你想魔改扩展代码/固定某个版本，可以把内置扩展复制到本地覆盖目录 `~/.openclaw/extensions/feishu` 再自行维护依赖（一般用不到；如遇权限问题给 `cp` 加 `sudo`）。
 
 ```bash
-# 进入 OpenClaw 扩展目录
-cd ~/.openclaw/extensions
+# 可选：复制内置扩展到本地（用于自定义/调试）
+mkdir -p ~/.openclaw/extensions
+cp -r /usr/lib/node_modules/openclaw/extensions/feishu ~/.openclaw/extensions/feishu
 
-# 克隆社区版飞书扩展
-git clone https://github.com/openclaw/extension-feishu.git feishu
-
-# 安装依赖
-cd feishu
+cd ~/.openclaw/extensions/feishu
 npm install
 ```
 
@@ -272,18 +275,10 @@ nano ~/.openclaw/openclaw.json
 - `verificationToken` 和 `encryptKey` 在飞书"事件订阅"页面获取
 - 如果不需要加密，`encryptKey` 可以留空
 
-### 为什么用社区版？
+### 扩展版本说明
 
-**社区版优势**：
-- 功能更完善（支持更多消息类型）
-- 更新更及时（社区活跃维护）
-- 问题修复快（GitHub Issues 响应快）
-- 可以自己定制（开源代码）
-
-**官方版问题**：
-- 功能较基础
-- 更新较慢
-- 部分边缘场景支持不好
+- **大多数人**：直接用 OpenClaw **内置**的飞书扩展即可（随 OpenClaw 一起升级，省心）。
+- **需要定制/调试**：再用上面的「复制到本地覆盖」方式，把扩展放到 `~/.openclaw/extensions/feishu` 自己维护。
 
 重启并测试：
 ```bash
@@ -366,30 +361,48 @@ mkdir -p memory
 
 ### 2. 安装必要的 Skills
 
-#### skill-library-manager（必装）
+OpenClaw 的 Skill 本质上就是一个目录（里面有 `SKILL.md`）。它会从以下位置加载（优先级从高到低）：
 
-Vercel 开发的技能管理工具，用于发现、安装、更新高质量 Skills。
+1. `<workspace>/skills`
+2. `~/.openclaw/skills`
+3. **内置 skills**（随 openclaw 安装自带）
+
+下面是我建议的“必装组合”（够用 + 可扩展）：
+
+#### browser（OpenClaw 内置，必用）
+
+浏览器自动化能力，OpenClaw 已内置。需要时启动：
 
 ```bash
-cd ~/.openclaw/skills
-git clone https://github.com/vercel/skill-library-manager.git
-cd skill-library-manager
-npm install
+openclaw browser start
+openclaw browser status
 ```
 
-**用法**：
+#### skill-creator（OpenClaw 内置，推荐）
+
+用于创建/维护你自己的 Skills。OpenClaw 已内置，无需安装：
+
+- 路径：`/usr/lib/node_modules/openclaw/skills/skill-creator`
+
+#### find（推荐安装）
+
+智能“找东西”工具（找人/找文件/找链接/找产品/找地点），适合日常问答和资料检索。
+
+推荐使用 **ClawHub**（官方技能仓库）安装：
+
 ```bash
-# 搜索技能
-openclaw skill search github
+# 安装 ClawHub CLI
+npm i -g clawhub
 
-# 安装高分技能
-openclaw skill install --top-rated
-
-# 更新技能
-openclaw skill update
+# 安装到你的 OpenClaw workspace（默认会写入 ./skills）
+cd ~/.openclaw/workspace
+clawhub search find
+clawhub install find
 ```
 
-#### agent-reach（必装）
+安装后一般会出现在：`~/.openclaw/workspace/skills/find`。
+
+#### agent-reach（推荐安装）
 
 集成多个搜索服务的全网搜索工具，支持：
 - Twitter/X、Reddit、YouTube
@@ -408,20 +421,32 @@ npm install
 nano ~/.openclaw/skills/agent-reach/config.json
 ```
 
+#### skill-library-manager（可选，进阶）
+
+如果你需要批量管理大量 Skills（同步、校验、迁移），再安装这类管理工具即可；没有强需求可以先跳过。
+
 **一键复制提示词给 Kimi**：
+
 ```
-帮我安装 OpenClaw 的必要 Skills：
+帮我把 OpenClaw 的常用 Skills 配好（能用优先）：
 
-1. skill-library-manager
-   - 克隆：git clone https://github.com/vercel/skill-library-manager.git
-   - 安装依赖：npm install
+1) 启动内置 browser 能力（如果未启动）：
+   - openclaw browser start
+   - openclaw browser status
 
-2. agent-reach  
-   - 克隆：git clone https://github.com/openclaw/agent-reach.git
-   - 安装依赖：npm install
-   - 创建配置文件模板
+2) 安装 ClawHub CLI，并安装 find skill 到 ~/.openclaw/workspace/skills：
+   - npm i -g clawhub
+   - cd ~/.openclaw/workspace
+   - clawhub search find
+   - clawhub install find
 
-位置：~/.openclaw/skills/
+3) 安装 agent-reach（如果需要全网搜索聚合）：
+   - cd ~/.openclaw/skills
+   - git clone https://github.com/openclaw/agent-reach.git
+   - cd agent-reach && npm install
+   - 初始化配置文件 ~/.openclaw/skills/agent-reach/config.json（留空模板即可）
+
+说明：skill-creator 是 OpenClaw 内置 skill（/usr/lib/node_modules/openclaw/skills/skill-creator），无需安装。
 ```
 
 #### 其他推荐 Skills（按需安装）
@@ -474,28 +499,37 @@ git clone https://github.com/openclaw/skill-calendar.git
 4. 没有事项时回复 HEARTBEAT_OK
 ```
 
-### 4. Memory 管理规范
+### 4. Memory 管理规范（两层记忆）
 
-基于我们实际使用的管理方式：
+OpenClaw 每次会话都是“短暂记忆”——**你让它“记住”没有用**，如果希望下次还能用到，一定要写进文件。
 
-**日常记录**：`memory/YYYY-MM-DD.md`
+#### 第一层：日常 raw logs（`memory/YYYY-MM-DD.md`）
+
 - 今天做了什么
-- 遇到的问题和解决方案
-- 重要决策和想法
+- 遇到的问题与解决方案
+- 临时上下文（比如正在推进的任务、待办）
 
-**长期记忆**：`MEMORY.md`
-- 每周整理一次日常记录
-- 提取重要信息到 MEMORY.md
-- 保持精简（< 5000 字）
+#### 第二层：长期精华（`MEMORY.md`，仅主会话加载）
 
-**安全规则**：
-- MEMORY.md 只在主会话加载（不在群聊）
-- 敏感信息放在 `~/.openclaw/secrets/`
+- 从日常记录里提炼“以后还会反复用到”的信息
+- 保持精简（过期/无用信息要删）
+- **安全**：不在群聊/共享会话里加载（避免泄露私密上下文）
+
+#### 读取原则（精简优先）
+
+- Agent 不需要每次都读所有文件：**只读完成当前任务所需的最少集合**。
+- 默认：`SOUL.md` + `USER.md` + 今天/昨天的 `memory/YYYY-MM-DD.md`。
+- 只有在**主会话**（你和自己的机器人私聊）里才加载 `MEMORY.md`。
+
+#### 写入原则（写下来，不要“靠它记”）
+
+- 任何你希望下次还记得的东西：写到 `memory/` 或整理进 `MEMORY.md`。
+- 账号/密钥不要写进 memory：放到 `~/.openclaw/openclaw.json` 或 `~/.openclaw/secrets/`。
 
 **示例**：
 
 ```bash
-# 今天的记录
+# 今天的记录（raw log）
 cat >> memory/2026-03-01.md << 'EOF'
 ## 2026-03-01
 
@@ -507,14 +541,13 @@ cat >> memory/2026-03-01.md << 'EOF'
 - Kimi API Key 格式错误 → 不要包含空格
 
 ### 决策
-- 使用社区版飞书扩展
+- 飞书使用 OpenClaw 内置扩展（无需额外安装）
 EOF
 
-# 更新长期记忆
+# 后续整理到长期记忆（精华）
 cat >> MEMORY.md << 'EOF'
 ## 踩坑记录
 - Kimi API Key 不要包含空格
-- 飞书权限要完整配置
 EOF
 ```
 
