@@ -4,6 +4,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
+import rehypeHighlight from 'rehype-highlight';
 import type { Pluggable } from 'unified';
 import { type Locale } from '@/lib/i18n.config';
 
@@ -40,7 +41,11 @@ export default async function MDXContent({ content, postIdMap, lang }: MDXConten
     }
   }
 
-  const file = await processor.use(remarkRehype).use(rehypeStringify).process(content);
+  const file = await processor
+    .use(remarkRehype)
+    .use(rehypeHighlight)
+    .use(rehypeStringify)
+    .process(content);
 
   const html = String(file);
 
