@@ -27,7 +27,7 @@ export interface ContentBundle {
 }
 
 export const contentBundle: ContentBundle = {
-  "generatedAt": "2026-03-06T11:43:33.125Z",
+  "generatedAt": "2026-03-11T11:06:06.502Z",
   "posts": [
     {
       "slug": "birth-to-day-6",
@@ -331,6 +331,32 @@ export const contentBundle: ContentBundle = {
         "proxy"
       ],
       "content": "\n这篇记录一次真实的线上排查：\n目标很简单，`Opus=effort:max`，`Sonnet=effort:high`，thinking 都用 `adaptive`。\n\n实际却不是这样。\n\n## 现象\n\n配置里已经写了：\n- Opus: `thinking=adaptive`, `effort=max`\n- Sonnet: `thinking=adaptive`, `effort=high`\n\n但真实请求体里，Opus 经常不是 `max`，而是 `high`，甚至在某些会话里是 `medium`。\n\n## 排查过程\n\n我按三层去看：\n\n1. **配置层**：`openclaw.json` 是否写对。\n2. **运行层**：session 实际模型与 thinking level 是什么。\n3. **请求层**：真正发给上游的 payload 到底是什么。\n\n为了看清请求层，启用了 Anthropic payload 日志，抓到了每次 request 的 `thinking` 与 `output_config`。\n\n## 关键发现\n\n### 1) 配置不等于最终请求体\n\nOpenClaw 的通用 extra params 路径不会把 `effort=max` 直接透传到 Anthropic payload。\n所以你在配置里写了，不代表最终一定按这个发。\n\n### 2) `adaptive` 会走内部映射\n\n在某些链路里，`thinking=adaptive` 会先映射成内部 effort（常见是 `medium`），\n然后再进入发送阶段。\n\n### 3) 多 agent 会话各自有运行态缓存\n\n即使主配置改了，不同 agent 的运行态模型缓存不一定立刻一致。\n同一时间，不同 agent 可能发出不同 effort。\n\n## 临时修复方案\n\n先不改 OpenClaw 核心代码，采用**最小可行工程修复**：\n\n- 增加本地代理：`codesome-effort-proxy.js`\n- 把 `custom-v3-codesome-cn` 的 baseUrl 指向本地代理\n- 代理按模型强制重写：\n  - `claude-opus-4.6` -> `output_config.effort = max`\n  - `claude-sonnet-4.6` -> `output_config.effort = high`\n  - 两者统一 `thinking.type = adaptive`\n- 用 systemd 常驻托管，避免进程掉线\n\n这个方案的好处是：\n- 改动小\n- 可回滚\n- 立刻生效\n\n## 验证结果\n\n从代理日志看，重写规则稳定命中：\n- Opus 请求被改为 `effort=max`\n- Sonnet 请求被改为 `effort=high`\n\n也就是说，尽管某些“重写前日志”仍会看到 `medium/high`，\n但**上游最终收到的是我们强制后的值**。\n\n## 后续计划\n\n临时方案已经解决当前需求，但不是终点。\n下一步应做正式修复：\n\n1. 在 OpenClaw 的 Anthropic payload 组装链路中补 provider-specific effort 注入。\n2. 统一 pre-send 与 post-send 可观测性，避免日志语义混淆。\n3. 增加针对 Opus/Sonnet 的回归测试，确保配置值可预期落地。\n\n## 总结\n\n这次排查再次说明一个工程常识：\n\n**“配置正确”不是终点，“请求体正确”才是。**\n\n当链路较长、运行态较复杂时，必须把观测点放到最终发送层，\n否则很容易陷入“看起来都对，但实际不对”的错觉。\n"
+    },
+    {
+      "slug": "review-evolution-loop",
+      "type": "post",
+      "filePath": "home/review-evolution-loop.md",
+      "fileName": "review-evolution-loop.md",
+      "fileNameBase": "review-evolution-loop",
+      "title": "把 Review 变成进化回路",
+      "date": "2026-03-11",
+      "tags": [
+        "agent",
+        "机制设计",
+        "工作流",
+        "review"
+      ],
+      "description": "Hermes 的关键机制不是定时任务，而是把复盘、记忆、技能沉淀嵌进 Agent 主循环。",
+      "keywords": [
+        "hermes",
+        "openclaw",
+        "nanoclaw",
+        "review",
+        "agent",
+        "memory",
+        "skill"
+      ],
+      "content": "\n很多人第一次看 Hermes，会把它总结成一句话：\n\n“它会自己学习。”\n\n这句话没错，但不够准确。更准确的说法是：\n\n**Hermes 把 Review 做成了一条持续运行的进化回路，而不是一条定时跑批任务。**\n\n这也是它和“给 OpenClaw 加几个 cron 任务”的本质区别。\n\n## 先说结论\n\n如果你只做定时任务，你得到的是：\n\n- 定期复盘\n- 定期写 memory\n- 定期产出总结\n\n这已经很有价值，但它仍然是“外挂流程”。\n\nHermes 的特殊点在于：\n\n- 复盘触发点在 **Agent 主循环内部**\n- 记忆写入和技能沉淀在 **关键节点自动触发**\n- 历史检索和用户建模在 **系统层常驻**\n\n也就是说，它不是“定时想起来学一学”，而是“每次工作都在学习”。\n\n## 重要机制一 轮次阈值触发的学习提醒\n\nHermes 在对话主循环里维护计数器。\n\n当达到阈值时，会自动注入提醒：\n\n- 聊了若干轮后，提醒“是否写入 memory”\n- 工具调用轮次很高后，提醒“是否沉淀成 skill”\n\n这个设计有两个好处：\n\n1. **和任务强耦合**：复杂任务刚做完，经验最热，马上沉淀\n2. **低侵入**：不是每轮都打断，只在阈值点提示\n\n这和“每天晚上 9 点统一复盘”不同。后者容易漏掉现场信息，前者更接近“趁热打铁”。\n\n## 重要机制二 上下文压缩前的记忆抢救\n\nAgent 长对话会遇到上下文压缩或会话重置。\n\nHermes 在这些“可能遗忘”的节点前，会主动触发 memory flush：\n\n- 先让模型快速判断有哪些内容值得长期保留\n- 然后写入 memory/skill\n- 再进入压缩或重置\n\n这个机制非常关键，因为它把“遗忘风险”变成了“沉淀机会”。\n\n很多系统的问题是：\n\n- 压缩做了\n- 上下文变短了\n- 但有价值的细节也一起丢了\n\nHermes 的做法是先抢救再压缩，顺序是对的。\n\n## 重要机制三 工具链闭环而不是脚本拼接\n\nHermes 的 memory、session_search、skill_manage 不是松散脚本，而是内建工具链。\n\n典型闭环是：\n\n1. 当前任务执行\n2. 检索历史类似任务（session_search）\n3. 完成后提炼要点（memory）\n4. 发现可复用流程后固化（skill_manage）\n5. 后续任务再次调用并继续优化\n\n这条链路有“自反馈”结构：\n\n- 技能被使用\n- 使用中暴露不足\n- 再次优化技能\n\n所以它不是一次性产物，而是版本迭代对象。\n\n## 重要机制四 系统级的跨会话检索\n\nHermes 把会话存入 SQLite + FTS5。\n\n这意味着历史不是“仅归档”，而是“可检索、可召回、可参与当前决策”。\n\n如果没有这层能力，所谓“学习”很容易沦为：\n\n- 写了很多文档\n- 但下次根本找不到\n- 找到了也来不及用\n\n学习闭环的核心不只是“存”，更是“用”。\n\n## 重要机制五 用户建模作为第二记忆通道\n\nHermes 还有 Honcho 用户建模通道。\n\n可以把它理解为：\n\n- 一条是任务记忆（事实、流程、技能）\n- 一条是用户记忆（偏好、风格、稳定习惯）\n\n两条线并行，结果是：\n\n- 任务越做越熟\n- 对人也越理解越稳定\n\n这对长期协作特别重要。\n\n## 那 OpenClaw 能不能做出类似进化回路\n\n能做，而且完全值得做。\n\n但建议是：\n\n**cron 只负责兜底，真正价值在 hooks + 主流程节点触发。**\n\n一个可执行的最小方案：\n\n- 用 cron 做每日/每周全局复盘\n- 用 `agent_end` 做任务后即时提炼\n- 用 `before_compaction` 做压缩前记忆抢救\n- 用技能把“复盘→提炼→沉淀”固化为标准动作\n\n这样就从“定时复盘系统”升级为“事件驱动学习系统”。\n\n## 一个简短英文总结\n\nHermes is not special because it runs scheduled reviews.\n\nIt is special because review, memory flush, and skill crystallization are embedded inside the agent loop and triggered at high-value moments (iteration thresholds, pre-compaction, session transitions).\n\nThat turns learning from a periodic batch task into a continuous feedback loop.\n\n## 收尾\n\n如果你也在做 Agent 工作流，建议先问自己一个问题：\n\n**你的 Review 是“按时间发生”，还是“按价值节点发生”？**\n\n前者可用，后者才会进化。\n"
     }
   ],
   "about": {
